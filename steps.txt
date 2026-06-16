@@ -1,0 +1,263 @@
+mvn archetype:generate -DgroupId=com.example -DartifactId=mvn4 -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+cd mvn4
+tree
+gedit pom.xml
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.example</groupId>
+  <artifactId>mvn4</artifactId>
+  <packaging>jar</packaging>
+  <version>1.0-SNAPSHOT</version>
+
+  <name>mvn4</name>
+  <url>http://maven.apache.org</url>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>33.4.0-jre</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.18.0</version>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+        <configuration>
+          <source>11</source>
+          <target>11</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.22.2</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.4</version>
+
+        <executions>
+          <execution>
+            <phase>package</phase>
+
+            <goals>
+              <goal>shade</goal>
+            </goals>
+
+            <configuration>
+              <transformers>
+
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>com.example.App</mainClass>
+                </transformer>
+
+              </transformers>
+            </configuration>
+
+          </execution>
+        </executions>
+
+      </plugin>
+
+    </plugins>
+  </build>
+
+</project>
+gedit src/main/java/com/example/App.java
+package com.example;
+import org.apache.commons.io.FileUtils;
+import java.io.File;
+import java.io.IOException;
+import com.google.common.collect.ImmutableList;
+
+public class App
+{
+public static void main(String[] args)
+{
+ImmutableList<String> fruits = ImmutableList.of("Apple", "Banana", "Cherry");
+System.out.println(fruits);
+
+
+    File sourceFile = new File("source.txt");
+    File destFile = new File("destination.txt");
+
+    try {
+        FileUtils.copyFile(sourceFile, destFile);
+        System.out.println("File copied successfully!");
+    } catch (IOException e) {
+        System.err.println("Error occurred while copying file: " + e.getMessage());
+    }
+}
+
+
+}
+
+mvn clean install
+tree
+OPTION 1
+java -jar target/mvn4-1.0-SNAPSHOT.jar
+Output:
+[Apple, Banana, Cherry]
+Error occurred while copying file: Source 'source.txt' does not exist
+echo "please copy this data from source to destination and say hello world good morning files copied" > source.txt
+java -jar target/mvn4-1.0-SNAPSHOT.jar
+Output:
+
+[Apple, Banana, Cherry]
+
+File copied successfully!
+
+OR
+
+OPTION 2
+
+mvn exec:java -Dexec.mainClass="com.example.App"
+
+Output:
+
+[Apple, Banana, Cherry]
+
+File copied successfully!
+gedit Jenkinsfile
+pipeline{
+agent any
+tools{
+maven 'Maven'
+}
+stages{
+stage('Checkout'){
+steps{
+git branch:'master',url:'https://github.com/prxj10/mvn4.git'
+}
+}
+stage('Build'){
+steps{
+sh 'mvn clean package'
+}
+}
+stage('Test'){
+steps{
+sh 'mvn test'
+}
+}
+stage('Run Application'){
+steps{
+sh 'java -jar target/mvn4-1.0-SNAPSHOT.jar'
+}
+}
+}
+post{
+success{
+echo 'Build and deployment success'
+}
+failure{
+echo 'Build failure'
+}
+}
+}
+
+OR
+
+pipeline{
+agent any
+tools{
+maven 'Maven'
+}
+stages{
+stage('Checkout'){
+steps{
+git branch:'master',url:'https://github.com/prxj10/mvn4.git'
+}
+}
+stage('Build'){
+steps{
+sh 'mvn clean package'
+}
+}
+stage('Test'){
+steps{
+sh 'mvn test'
+}
+}
+stage('Run Application'){
+steps{
+sh 'mvn exec:java -Dexec.mainClass="com.example.App"'
+}
+}
+}
+post{
+success{
+echo 'Build and deployment success'
+}
+failure{
+echo 'Build failure'
+}
+}
+}
+
+git init
+
+git add .
+
+git commit -m "Initial commit"
+
+git remote add origin https://github.com/prxj10/mvn4.git
+
+git remote set-url origin https://ghp_[YOURTOKEN@github.com](mailto:YOURTOKEN@github.com)/prxj10/mvn4.git
+
+git push -u origin master
+
+Jenkins Configuration
+
+New Item → Pipeline
+
+Pipeline Definition:
+
+Pipeline script from SCM
+
+SCM:
+
+Git
+
+Repository URL:
+
+https://github.com/prxj10/mvn4.git
+
+Branch Specifier:
+
+*/master
+
+Script Path:
+
+Jenkinsfile
+
+Click:
+
+Save → Build Now
+
