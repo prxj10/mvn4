@@ -11,12 +11,12 @@ pipeline{
 	}
 	stage('Build'){
 	steps{
-		sh 'mvn clean install'
+		sh 'mvn clean package'
 	}
 	}
-	stage('Prepare File'){
+	stage('Test'){
 	steps{
-		sh 'echo "Jenkins Data" > source.txt'
+		sh 'mvn test'
 	}
 	}
 	stage('Run Application'){
@@ -27,10 +27,10 @@ pipeline{
 	}
 	post{
 	success{
-		echo 'Build successful!'
+		echo 'Build and deployment success'
 	}
 	failure{
-		echo 'Build failed!'
+		echo 'Build failure'
 	}
 	}
 }
